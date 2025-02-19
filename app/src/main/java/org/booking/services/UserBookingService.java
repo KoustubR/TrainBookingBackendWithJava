@@ -4,11 +4,13 @@ package org.booking.services;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.booking.entities.Ticket;
+import org.booking.entities.Train;
 import org.booking.entities.User;
 import org.booking.util.UserServiceUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
@@ -21,8 +23,16 @@ public class UserBookingService {
 
     public UserBookingService(User user1) throws IOException {
         this.user = user1;
+        userList = loadUser();
+    }
+    public UserBookingService() throws IOException {
+        userList = loadUser();
+    }
+
+    public List<User> loadUser() throws IOException {
         File users = new File(usersPath);
         userList = objectMapper.readValue(users, new TypeReference<List<User>>() {});
+        return userList;
     }
 
     public Boolean loginUser(){
@@ -74,4 +84,27 @@ public class UserBookingService {
             }
         }
     }
+
+    public List<Train> getTrain(String source, String destination) {
+        try {
+            TrainServices trainServices = new TrainServices();
+            return trainServices.searchTrains(source, destination);
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+
+        }
+    }
+
+    public List<List<Integer>> fetchSeats(Train train){
+
+    }
+
+    public Boolean bookTrainSeat(Train train, int row, int seat) {
+
+    }
+
+
+}
+
 }
