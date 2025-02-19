@@ -25,29 +25,31 @@ public class UserBookingService {
         this.user = user1;
         userList = loadUser();
     }
+
     public UserBookingService() throws IOException {
         userList = loadUser();
     }
 
     public List<User> loadUser() throws IOException {
         File users = new File(usersPath);
-        userList = objectMapper.readValue(users, new TypeReference<List<User>>() {});
+        userList = objectMapper.readValue(users, new TypeReference<List<User>>() {
+        });
         return userList;
     }
 
-    public Boolean loginUser(){
+    public Boolean loginUser() {
         Optional<User> foundUser = userList.stream().filter(user1 -> {
             return user1.getName().equals(user.getName()) && UserServiceUtil.checkPassword(user.getPassword(), user1.getHashPassword());
         }).findFirst();
         return foundUser.isPresent();
     }
 
-    public Boolean signUp(User user1){
-        try{
+    public Boolean signUp(User user1) {
+        try {
             userList.add(user1);
             saveUserListToFile();
             return Boolean.TRUE;
-        }catch (IOException ex){
+        } catch (IOException ex) {
             return Boolean.FALSE;
         }
     }
@@ -57,7 +59,7 @@ public class UserBookingService {
         objectMapper.writeValue(usersFile, userList);
     }
 
-    public void fetchBooking(){
+    public void fetchBooking() {
         user.printTickets();
     }
 
@@ -66,19 +68,16 @@ public class UserBookingService {
         System.out.println("Please enter the id of the user you would like to cancel: ");
         ticketId = scanner.next();
 
-        if(ticketId == null || ticketId.isEmpty()){
+        if (ticketId == null || ticketId.isEmpty()) {
             System.out.println("Ticket id cannot be empty or null");
             return Boolean.FALSE;
-        }
-
-        else{
+        } else {
             String finalTicketId = ticketId;
             boolean removed = user.getTicketsbooked().removeIf(t -> finalTicketId.equals(t.getTicketId()));
-            if(removed){
+            if (removed) {
                 System.out.println("Ticket with id " + finalTicketId + " has been cancelled");
                 return Boolean.TRUE;
-            }
-            else{
+            } else {
                 System.out.println("No ticket found with id " + finalTicketId);
                 return Boolean.FALSE;
             }
@@ -92,19 +91,35 @@ public class UserBookingService {
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
-
-        }
+        return new ArrayList<>();
     }
 
-    public List<List<Integer>> fetchSeats(Train train){
-
+    public List<List<Integer>> fetchSeats(Train train) {
+        return train.getSeats();
     }
 
     public Boolean bookTrainSeat(Train train, int row, int seat) {
-
+        try {
+            TrainServices trainServices = new TrainServices();
+            List<List<Integer>> seats = train.getSeats();
+            if (row >= 0 && seat >= 0 && row < seats.size() && seat < seats.get(row).size()) {
+                if (seats.get(row).get(seat) == 0) {
+                    seats.get(row).set(seat, 1);
+                    train.setSeats(seats);
+                    trainServices.addTrain(train);
+                    return Boolean.TRUE;
+                } else {
+                    return Boolean.FALSE;
+                }
+            } else {
+                return Boolean.FALSE;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
-
-
 }
 
-}
+
+
+
